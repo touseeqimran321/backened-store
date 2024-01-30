@@ -10,7 +10,7 @@ const sequelize = new Sequelize({
 // const User = require('./user');
 const Product = require('./Model');
 const Cart = require('./cart');
-// const Order = require('./order')
+const Order = require('./order')
 
 
 const CartItem = sequelize.define('CartItem', {
@@ -18,7 +18,11 @@ const CartItem = sequelize.define('CartItem', {
       type: DataTypes.INTEGER,
       defaultValue: 1
     
-    }
+    },
+    status: {
+      type: DataTypes.ENUM('active', 'completed'), // Example using ENUM
+      defaultValue: 'active',
+    },
     
   },
   {

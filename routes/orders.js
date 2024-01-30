@@ -3,12 +3,18 @@ const router = express.Router();
 const Product = require('../models/Model');
 // const OrderItem = require('../models/orderitem');
 const Order =require('../models/order');
-const User = require('../models/user')
-const Cart= require('../models/cart')
-const CartItem = require('../models/Cartitem')
+const User = require('../models/user');
+const Cart= require('../models/cart');
+const CartItem = require('../models/Cartitem');
 
 
 
+// Function to calculate total amount based on cart items
+const calculateTotalAmount = (cartItems) => {
+  return cartItems.reduce((total, cartItem) => {
+    return total + cartItem.Product.productPrice * cartItem.quantity;
+  }, 0);
+};
 
 router.post('/checkout', async (req, res) => {
   const { userId, cartId } = req.body;
@@ -19,21 +25,26 @@ router.post('/checkout', async (req, res) => {
       return res.status(400).json({ error: 'Invalid or missing userId or cartId in the request body' });
     }
 
-    // Create a new order with the specified userId and cartId
-    const order = await Order.create({ UserId: userId, CartId: cartId });
-
     // Fetch the cart items associated with the user's cart
     const cartItems = await CartItem.findAll({
-      where: { CartId: cartId },
+      where: { CartId: cartId, status: 'active' }, // Fetch only active cart items
       include: [{ model: Product, attributes: ['productName', 'productPrice', 'productImage', 'quantityInstock'] }],
     });
 
-    // Delete cart items associated with the completed order
-    await CartItem.destroy({
-      where: { CartId: cartId },
-    });
+    // Create a new order with the specified userId and cartId
+    const order = await Order.create({ UserId: userId, CartId: cartId });
 
-    res.status(201).json({ message: 'Checkout Sucessfully', order, cartItems });
+    // Update order details
+    order.totalAmount = calculateTotalAmount(cartItems);
+    order.shippingAddress = req.body.shippingAddress;
+
+    // Save the updated order details
+    await order.save();
+
+    // Update the status of cart items to 'completed'
+    await CartItem.update({ status: 'completed' }, { where: { CartId: cartId, status: 'active' } });
+
+    res.status(201).json({ message: 'Checkout successfully', order, cartItems });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -42,8 +53,4 @@ router.post('/checkout', async (req, res) => {
 
 
 
-
-
-
-
-module.exports = router
+module.exports = router;
