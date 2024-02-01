@@ -37,7 +37,7 @@ const CartItem = sequelize.define('CartItem', {
 
 
 // CartItem.belongsTo(User);
-CartItem.belongsTo(Product);
+CartItem.belongsTo(Product, {foreignKey: 'ProductId'});
 CartItem.belongsTo(Cart);
 // CartItem.belongsTo(Order);
 

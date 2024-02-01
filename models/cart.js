@@ -27,3 +27,4 @@ Cart.belongsTo(User);
 
 module.exports = Cart;
 
+

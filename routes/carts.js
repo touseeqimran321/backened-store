@@ -73,7 +73,8 @@ const Order =require('../models/order');
 
 
 router.post('/add', async (req, res) => {
-  const { userId, items } = req.body;
+  const userId = 5;
+  const items = req.body.items;
 
   // Check if userId is defined
   if (userId === undefined) {
@@ -86,6 +87,10 @@ router.post('/add', async (req, res) => {
       where: { UserId: userId },
     });
 
+    console.log('userId:', userId);
+    console.log('items:', items);
+    console.log('cart:', cart);  // Move this line here
+
     // Check if items is an array
     if (!Array.isArray(items)) {
       return res.status(400).json({ error: 'Invalid or missing items array in the request body' });
@@ -96,6 +101,8 @@ router.post('/add', async (req, res) => {
 
       // Check if the product exists
       const product = await Product.findByPk(productId);
+
+      console.log('product:', product);  // Move this line here
 
       if (!product) {
         return res.status(404).json({ error: `Product with ID ${productId} not found` });
@@ -111,6 +118,8 @@ router.post('/add', async (req, res) => {
         where: { CartId: cart.id, ProductId: productId },
       });
 
+      console.log('cartItem:', cartItem);  // Move this line here
+
       if (!cartItem) {
         // If the cart item doesn't exist, create a new one
         cartItem = await CartItem.create({
@@ -118,7 +127,7 @@ router.post('/add', async (req, res) => {
           ProductId: productId,
           quantity,
         });
-
+        console.log('Created cartItem:', cartItem); 
         // Update the product quantity in stock
         product.quantityInstock -= quantity;
         await product.save();
@@ -141,7 +150,7 @@ router.post('/add', async (req, res) => {
 
     res.status(201).json({ message: 'Items added to cart successfully', cartItems });
   } catch (error) {
-    console.error(error);
+    console.error('Sequelize error', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -269,12 +278,13 @@ router.delete('/remove/:cartItemId', async (req, res) => {
  *                   type: string
  */
 router.get('/get', async (req, res) => {
-  const userId = req.query.userId;
+  const userId = 5;
 
   // Check if userId is defined
-  if (!userId) {
-    return res.status(400).json({ error: 'UserId is missing or undefined in the request query parameters' });
-  }
+  // if (!userId) {
+  //   console.log('UserId is missing or undefined in the request query parameters');
+  //   return res.status(400).json({ error: 'UserId is missing or undefined in the request query parameters' });
+  // }
 
   try {
     // Find the cart for the user
@@ -284,21 +294,27 @@ router.get('/get', async (req, res) => {
 
     // Check if the cart exists
     if (!cart) {
+      console.log('Cart not found for the specified user');
       return res.status(404).json({ error: 'Cart not found for the specified user' });
     }
+
+    console.log('Found cart:', cart);
 
     // Fetch the cart items associated with the user's cart
     const cartItems = await CartItem.findAll({
       where: { CartId: cart.id },
-      include: [{ model: Product, attributes: [ 'productName', 'productPrice', 'productImage'] }],
+      include: [{ model: Product, attributes: ['productName', 'productPrice', 'productImage'] }],
     });
+
+    console.log('Fetched cartItems:', cartItems);
 
     res.status(200).json({ message: 'Cart items retrieved successfully', cartItems });
   } catch (error) {
-    console.error(error);
+    console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  } 
 });
+
 
 
 // /**
