@@ -6,7 +6,7 @@ const Cart = require('../models/cart');
 const CartItem = require('../models/Cartitem');
 
 router.post('/checkout', async (req, res) => {
-  const cartId = 1;
+  const cartId = 1; // Assuming you get cartId from the request or another source
 
   // Ensure cartId is a valid integer
   if (!Number.isInteger(cartId)) {
@@ -14,14 +14,23 @@ router.post('/checkout', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or missing cartId in the request body' });
   }
 
-  const userId = 5;
+  const userId = 5; // Assuming you get userId from the request or another source
 
   try {
-    // Check if userId and cartId are provided
-    // if (!userId || !cartId) {
-    //   console.log('Invalid or missing userId or cartId in the request body');
-    //   return res.status(400).json({ error: 'Invalid or missing userId or cartId in the request body' });
-    // }
+    // Fetch the cart associated with the cartId
+    const cart = await Cart.findByPk(cartId);
+
+    // Check if cart exists
+    if (!cart) {
+      console.log('Invalid CartId. Cart does not exist.');
+      return res.status(400).json({ error: 'Invalid CartId. Cart does not exist.' });
+    }
+
+    // Check if the cart has already been completed
+    if (cart.status === 'completed') {
+      console.log('Cart has already been checked out.');
+      return res.status(400).json({ error: 'Cart has already been checked out.' });
+    }
 
     // Fetch the cart items associated with the user's cart
     const cartItems = await CartItem.findAll({
@@ -29,33 +38,22 @@ router.post('/checkout', async (req, res) => {
       include: [{ model: Product, attributes: ['productName', 'productPrice', 'productImage', 'quantityInstock'] }],
     });
 
-    // Fetch the cart associated with the cartId
-    const cart = await Cart.findByPk(cartId);
-
-    // Log the cart to the console
-    console.log('Cart:', cart);
-
-    if (!cart) {
-      console.log('Invalid CartId. Cart does not exist.');
-      return res.status(400).json({ error: 'Invalid CartId. Cart does not exist.' });
-    }
-
-  
     // Create a new order with the specified userId and cartId
     const order = await Order.create({ UserId: userId, CartId: cartId });
 
     // Update the status of cart items to 'completed'
     await CartItem.update({ status: 'completed' }, { where: { CartId: cartId, status: 'active' } });
 
+    // Update the cart status to 'completed'
+    await Cart.update({ status: 'completed' }, { where: { id: cartId } });
+
     console.log('Checkout successfully:', { order, cartItems, cart });
     res.status(201).json({ message: 'Checkout successfully', order, cartItems, cart });
-
-   
-
   } catch (error) {
     console.error('Internal server error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;
