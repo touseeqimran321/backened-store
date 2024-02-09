@@ -72,10 +72,15 @@ const upload = multer({ storage: storage });
 
 // Create a new product
 router.post('/products', upload.single('productImage'), async (req, res) => {
+ 
   try {
+    // if (!req.file) {
+    //   return res.status(400).json({ success: false, error: 'No file uploaded' });
+    // }
     // Extract data from the request body and file
     const { productName, productPrice, productDescription, quantityInstock } = req.body;
     const { filename } = req.file;
+    console.log(req.file);
 
     // Validate input data
     if (!productName || !productPrice || !productDescription || !quantityInstock || !filename) {
