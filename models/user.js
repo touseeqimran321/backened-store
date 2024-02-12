@@ -32,6 +32,11 @@ const User = sequelize.define('User', {
   timestamps: false
 });
 
+
+User.prototype.generateAuthToken = function () {
+  return jwt.sign({ id: this.id, email: this.email }, 'your_secret_key');
+}
+
 sequelize.sync({alter: true}).then(() =>{
     console.log('Table Created');
 }).catch((err)=>{

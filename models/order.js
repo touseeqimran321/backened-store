@@ -16,7 +16,16 @@ const Cart =require('./cart')
       allowNull: false,
       defaultValue: 'active', // You can customize the possible values based on your needs
     },
-  }, {
+    shippingInfo: {
+      type: DataTypes.JSON,
+      allowNull: false
+    },
+    paymentInfo: {
+      type: DataTypes.JSON,
+      allowNull: false
+    }
+  },
+   {
     timestamps: false
   });
 

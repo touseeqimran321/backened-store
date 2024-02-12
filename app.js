@@ -13,7 +13,7 @@ const cors = require('cors');
 
 const bodyParser = require('body-parser');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
