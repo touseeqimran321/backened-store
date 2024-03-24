@@ -73,7 +73,7 @@ const Order =require('../models/order');
 
 
 router.post('/add', async (req, res) => {
-  const userId = 5;
+  const userId = req.body.userId;
   const items = req.body.items;
 
   // Check if userId is defined
@@ -278,7 +278,7 @@ router.delete('/remove/:cartItemId', async (req, res) => {
  *                   type: string
  */
 router.get('/get', async (req, res) => {
-  const userId = 5;
+  const userId = req.query.userId;
 
   // Check if userId is defined
   // if (!userId) {

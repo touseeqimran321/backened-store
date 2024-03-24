@@ -18,11 +18,11 @@ const Cart =require('./cart')
     },
     shippingInfo: {
       type: DataTypes.JSON,
-      allowNull: false
+      
     },
     paymentInfo: {
       type: DataTypes.JSON,
-      allowNull: false
+      
     }
   },
    {

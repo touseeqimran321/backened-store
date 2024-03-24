@@ -9,6 +9,7 @@ const sequelize = new Sequelize({
     
   });
 const User = require('./user');
+const Product = require('./Model');
 
 const Cart = sequelize.define('Cart', {
 
@@ -24,6 +25,8 @@ sequelize.sync({alter: true}).then(() =>{
 })
 
 Cart.belongsTo(User);
+Cart.belongsTo(Product)
+
 
 module.exports = Cart;
 
