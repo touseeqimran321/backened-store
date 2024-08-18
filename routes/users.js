@@ -1,12 +1,12 @@
 const express = require('express');
-const User = require('../models/user');
+const User = require('../models/user'); // Ensure the path is correct
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const secretKey = 'token'; // Change this to your actual secret key
+const secretKey = 'touseeq'; // Use a strong, secure secret key
 
-const authenticateUser = async (req, res, next) => {
+const authenticateUser = (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -28,7 +28,7 @@ const authenticateUser = async (req, res, next) => {
       next();
     });
   } catch (error) {
-    console.error(error);
+    console.error('Internal server error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -37,6 +37,11 @@ router.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(409).json({ error: 'User already exists' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
@@ -44,9 +49,11 @@ router.post('/signup', async (req, res) => {
       email,
       password: hashedPassword,
     });
-   
 
-    res.status(201).json({ id: newUser.id, username: newUser.username, email: newUser.email });
+    const payload = { id: newUser.id, email: newUser.email };
+    const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+
+    res.status(201).json({ token, user: { id: newUser.id, username: newUser.username, email: newUser.email } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -67,9 +74,9 @@ router.post('/login', async (req, res) => {
 
     if (passwordMatch) {
       const payload = { id: user.id, email: user.email };
-      const token = jwt.sign(payload, secretKey, { expiresIn: '5h' });
+      const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
 
-      res.status(200).json({ message: 'Login successful', token });
+      res.status(200).json({ token, user: { id: user.id, username: user.username, email: user.email } });
     } else {
       res.status(401).json({ error: 'Invalid password' });
     }
@@ -85,7 +92,7 @@ router.get('/user/:id', authenticateUser, async (req, res) => {
   try {
     console.log("Fetching user with ID:", userId);
 
-    const user = await User.findById(userId);
+    const user = await User.findByPk(userId); // Corrected method to findByPk
 
     if (!user) {
       console.log("User not found with ID:", userId);
@@ -118,19 +125,23 @@ router.get('/get', authenticateUser, async (req, res) => {
   }
 });
 
-router.post('/checkUser', authenticateUser, async (req, res) => {
+router.post('/checkUser', async (req, res) => { // Removed authenticateUser
   try {
     const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
 
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
-      res.json({ exists: true });
+      return res.json({ exists: true });
     } else {
-      res.json({ exists: false });
+      return res.json({ exists: false });
     }
   } catch (error) {
-    console.error(error);
+    console.error('Internal server error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

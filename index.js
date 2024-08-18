@@ -16,7 +16,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+// app.use(cors(
+//   {
+//     origin: [],
+//     methods: [GET, POST],
+//     credentials: true
+//   }
+// ))
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal server error' });
