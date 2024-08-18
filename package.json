@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index.js --tunnel-url https://localhost:3000",
-    "start": "node your-app-entry-file.js",
-    "dev-with-tunnel": "node your-app-entry-file.js --tunnel-url"
-  },
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
