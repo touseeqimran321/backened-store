@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "vercel-build": "react-scripts build --verbose",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
-},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js --tunnel-url https://localhost:3000",
+      "vercel-build": "react-scripts build", 
+
+    "start": "node your-app-entry-file.js",
+    "dev-with-tunnel": "node your-app-entry-file.js --tunnel-url"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
